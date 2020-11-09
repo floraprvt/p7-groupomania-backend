@@ -50,7 +50,7 @@ exports.createGif = (req, res, next) => {
   const gif = new Gif({
     userId: req.body.userId,
     title: JSON.parse(req.body.title),
-    url: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` // `../backend/${req.file.path}`
+    url: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
   })
   gif.save()
     .then(() => {
@@ -99,11 +99,11 @@ exports.modifyGif = (req, res, next) => {
 
 /* -- delete a gif and the image in the folder images -- */
 exports.deleteGif = (req, res, next) => {
-  Gif.findOne({ where: { gifId: req.params.id } })
+  Gif.findAll({ where: { gifId: req.params.id }, plain: true})
     .then(gif => {
-      const filename = gif.imageUrl.split('/images/')[1]
+      const filename = gif.url.split('/images/')[1]
       fs.unlink(`images/${filename}`, () => {
-        Gif.deleteOne({ where: { gifId: req.params.id } })
+        Gif.destroy({ where: { gifId: req.params.id } })
           .then(() => res.status(200).json({ message: 'Gif deleted' }))
           .catch(error => res.status(400).json({ error }))
       })
@@ -113,7 +113,7 @@ exports.deleteGif = (req, res, next) => {
 
 /* -- allow to like ou dislike a gif -- */
 exports.likeGif = (req, res, next) => {
-  Gif.findOne({ where: { gifId: req.params.id } })
+  Gif.findAll({ where: { gifId: req.params.id } })
     .then(gif => {
       switch (req.body.like) {
         /* -- if user clicks on like -- */
