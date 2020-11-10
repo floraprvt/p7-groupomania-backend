@@ -39,7 +39,7 @@ exports.getOneGif = (req, res, next) => {
       model: Comment,
       as: 'Comments',
       attributes: ['gifId']
-    }]    
+    }]
   })
     .then(gif => res.status(200).json(gif))
     .catch(error => res.status(404).send({ error }))
@@ -68,14 +68,14 @@ exports.createGif = (req, res, next) => {
 
 /* -- modify a gif (and the image if necessary) -- */
 exports.modifyGif = (req, res, next) => {
+  const title = JSON.parse(req.body.title)
   if (req.file) {
-    const gifObject = JSON.parse(req.body.gif)
-    const imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-    Gif.findOne({ where: { gifId: req.params.id } })
+    const url = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+    Gif.findAll({ where: { gifId: req.params.id }, plain: true })
       .then(gif => {
-        const filename = gif.imageUrl.split('/images/')[1]
+        const filename = gif.dataValues.url.split('/images/')[1]
         fs.unlink(`images/${filename}`, () => {
-          Gif.updateOne({ where: { gifId: req.params.id } }, { ...gifObject, $set: { imageUrl: imageUrl, likes: 0, dislikes: 0, usersLiked: [], usersDisliked: [] }, _id: req.params.id })
+          Gif.update({ title: title, url: url, likes: 0 }, { where: { gifId: req.params.id } })
             .then(() => {
               sharp(req.file.path)
                 .resize(480, 480)
@@ -91,7 +91,7 @@ exports.modifyGif = (req, res, next) => {
       })
       .catch(error => res.status(500).json({ error }))
   } else {
-    Gif.updateOne({ where: { gifId: req.params.id } }, { ...req.body, $set: { likes: 0, dislikes: 0, usersLiked: [], usersDisliked: [] }, _id: req.params.id })
+    Gif.update({ title: title }, { where: { gifId: req.params.id }},  )
       .then(() => res.status(201).json({ message: 'Gif modified !' }))
       .catch(error => res.status(400).json({ error }))
   }
@@ -99,7 +99,7 @@ exports.modifyGif = (req, res, next) => {
 
 /* -- delete a gif and the image in the folder images -- */
 exports.deleteGif = (req, res, next) => {
-  Gif.findAll({ where: { gifId: req.params.id }, plain: true})
+  Gif.findAll({ where: { gifId: req.params.id }, plain: true })
     .then(gif => {
       const filename = gif.url.split('/images/')[1]
       fs.unlink(`images/${filename}`, () => {
