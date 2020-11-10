@@ -6,6 +6,7 @@ const path = require('path')
 const User = require('./models/User')
 const Gif = require('./models/Gif')
 const Comment = require('./models/Comment')
+const Like = require('./models/Like')
 
 User.hasMany(Gif, { as: "Gifs", foreignKey: "userId" });
 Gif.belongsTo(User, { as: "User", foreignKey: "userId" });
@@ -16,11 +17,18 @@ Comment.belongsTo(User, { as: "User", foreignKey: "userId" });
 Gif.hasMany(Comment, { as: "Comments", foreignKey: "gifId" });
 Comment.belongsTo(Gif, { as: "Gif", foreignKey: "gifId" });
 
+User.hasMany(Like, { as: "Likes", foreignKey: "userId" });
+Like.belongsTo(User, { as: "User", foreignKey: "userId" });
+
+Gif.hasMany(Like, { as: "Likes", foreignKey: "gifId" });
+Like.belongsTo(Gif, { as: "Gif", foreignKey: "gifId" });
+
 const app = express()
 
 const userRoutes = require('./routes/user')
 const gifRoutes = require('./routes/gif')
 const commentRoutes = require('./routes/comment')
+const likeRoutes = require('./routes/like')
 
 /* -- DB Connection -- */
 require('./database/connection')
@@ -44,5 +52,6 @@ app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use('/api/auth', userRoutes)
 app.use('/api/gifs', gifRoutes)
 app.use('/api/comments', commentRoutes)
+app.use('/api/likes', likeRoutes)
 
 module.exports = app

@@ -4,11 +4,12 @@ const sharp = require('sharp')
 const Gif = require('../models/Gif')
 const User = require('../models/User')
 const Comment = require('../models/Comment')
+const Like = require('../models/Like')
 
 /* -- display gifs -- */
 exports.getAllGifs = (req, res, next) => {
   Gif.findAll({
-    attributes: ['gifId', 'title', 'url', 'likes', [sequelize.fn('date_format', sequelize.col('gif.createdAt'), 'le %e %b à %k:%i'), 'createdAtFormed']],
+    attributes: ['gifId', 'title', 'url', [sequelize.fn('date_format', sequelize.col('gif.createdAt'), 'le %e %b à %k:%i'), 'createdAtFormed']],
     include: [{
       model: User,
       as: 'User',
@@ -29,7 +30,7 @@ exports.getAllGifs = (req, res, next) => {
 exports.getOneGif = (req, res, next) => {
   Gif.findOne({
     where: { gifId: req.params.id },
-    attributes: ['gifId', 'title', 'url', 'likes', [sequelize.fn('date_format', sequelize.col('gif.createdAt'), 'le %e %b à %k:%i'), 'createdAtFormed']],
+    attributes: ['gifId', 'title', 'url', [sequelize.fn('date_format', sequelize.col('gif.createdAt'), 'le %e %b à %k:%i'), 'createdAtFormed']],
     include: [{
       model: User,
       as: 'User',
@@ -75,7 +76,7 @@ exports.modifyGif = (req, res, next) => {
       .then(gif => {
         const filename = gif.dataValues.url.split('/images/')[1]
         fs.unlink(`images/${filename}`, () => {
-          Gif.update({ title: title, url: url, likes: 0 }, { where: { gifId: req.params.id } })
+          Gif.update({ title: title, url: url }, { where: { gifId: req.params.id } })
             .then(() => {
               sharp(req.file.path)
                 .resize(480, 480)
@@ -91,7 +92,7 @@ exports.modifyGif = (req, res, next) => {
       })
       .catch(error => res.status(500).json({ error }))
   } else {
-    Gif.update({ title: title }, { where: { gifId: req.params.id }},  )
+    Gif.update({ title: title }, { where: { gifId: req.params.id } },)
       .then(() => res.status(201).json({ message: 'Gif modified !' }))
       .catch(error => res.status(400).json({ error }))
   }
@@ -107,55 +108,6 @@ exports.deleteGif = (req, res, next) => {
           .then(() => res.status(200).json({ message: 'Gif deleted' }))
           .catch(error => res.status(400).json({ error }))
       })
-    })
-    .catch(error => res.status(500).json({ error }))
-}
-
-/* -- allow to like ou dislike a gif -- */
-exports.likeGif = (req, res, next) => {
-  Gif.findAll({ where: { gifId: req.params.id } })
-    .then(gif => {
-      switch (req.body.like) {
-        /* -- if user clicks on like -- */
-        case 1:
-          if (!gif.usersLiked.includes(req.body.userId)) {
-            Gif.updateOne(
-              { where: { gifId: req.params.id } },
-              { $inc: { likes: 1 }, $push: { usersLiked: req.body.userId }, _id: req.params.id }
-            )
-              .then(() => res.status(201).json({ message: 'Like added' }))
-              .catch(error => res.status(400).json({ error }))
-          }
-          break
-        /* -- if user clicks on dislike -- */
-        case -1:
-          if (!gif.usersDisliked.includes(req.body.userId)) {
-            Gif.updateOne(
-              { where: { gifId: req.params.id } },
-              { $inc: { dislikes: 1 }, $push: { usersDisliked: req.body.userId }, _id: req.params.id }
-            )
-              .then(() => res.status(201).json({ message: 'Dislike added' }))
-              .catch(error => res.status(400).json({ error }))
-          }
-          break
-        /* -- if user clicks while he already liked or disliked -- */
-        case 0:
-          if (gif.usersLiked.includes(req.body.userId)) {
-            Gif.updateOne(
-              { where: { gifId: req.params.id } },
-              { $pull: { usersLiked: req.body.userId }, $inc: { likes: -1 }, _id: req.params.id }
-            )
-              .then(() => res.status(200).json({ message: 'Like removed' }))
-              .catch(error => res.status(400).json({ error }))
-          } else if (gif.usersDisliked.includes(req.body.userId)) {
-            Gif.updateOne(
-              { where: { gifId: req.params.id } },
-              { $pull: { usersDisliked: req.body.userId }, $inc: { dislikes: -1 }, _id: req.params.id }
-            )
-              .then(() => res.status(200).json({ message: 'Dislike removed' }))
-              .catch(error => res.status(400).json({ error }))
-          }
-      }
     })
     .catch(error => res.status(500).json({ error }))
 }

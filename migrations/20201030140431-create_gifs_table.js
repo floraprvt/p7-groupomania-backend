@@ -18,11 +18,6 @@ module.exports = {
         type: Sequelize.STRING(255),
         allowNull: false
       },
-      likes: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 0
-      },
       userId: {
         type: Sequelize.INTEGER,
         allowNull: false
