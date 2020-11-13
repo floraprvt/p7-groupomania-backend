@@ -7,7 +7,7 @@ const multer = require('../middleware/multer-config')
 const gifsCtrl = require('../controllers/gif')
 
 /* -- availables routes for gifs, with authentication -- */
-router.get('/', auth, gifsCtrl.getAllGifs)
+router.get('/', gifsCtrl.getAllGifs)
 router.get('/:id', auth, gifsCtrl.getOneGif)
 router.post('/', auth, multer, gifsCtrl.createGif)
 router.put('/:id', auth, multer, gifsCtrl.modifyGif)
