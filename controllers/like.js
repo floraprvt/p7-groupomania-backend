@@ -14,7 +14,6 @@ exports.createLike = (req, res, next) => {
     gifId: req.body.gifId,
     userId: req.body.userId,
   })
-  console.log(req.body.gifId)
   like.save()
     .then(() => { res.status(201).json({ message: 'Like added !' }) })
     .catch(error => res.status(400).json({ error }))
@@ -22,6 +21,7 @@ exports.createLike = (req, res, next) => {
 
 /* -- delete a like and the image in the folder images -- */
 exports.deleteLike = (req, res, next) => {
+  console.log(req.body)
   Like.destroy({ where: { gifId: req.params.id, userId: req.body.userId } })
     .then(() => res.status(200).json({ message: 'Like deleted' }))
     .catch(error => res.status(400).json({ error }))

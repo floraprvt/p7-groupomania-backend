@@ -140,7 +140,7 @@ exports.modifyUser = (req, res, next) => {
           )
             .then(() => {
               sharp(req.file.path)
-                .resize(480, 480)
+                .resize(500)
                 .toBuffer()
                 .then((data) => {
 

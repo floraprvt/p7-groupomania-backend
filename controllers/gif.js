@@ -14,7 +14,7 @@ exports.getAllGifs = (req, res, next) => {
       {
         model: User,
         as: "User",
-        attributes: ["firstName", "lastName"],
+        attributes: ["userId", "firstName", "lastName"],
       },
       {
         model: Comment,
@@ -24,7 +24,7 @@ exports.getAllGifs = (req, res, next) => {
       {
         model: Like,
         as: "Likes",
-        attributes: ["gifId"],
+        attributes: ["gifId", "likeId"],
       },
     ],
   })
