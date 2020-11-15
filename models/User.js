@@ -17,6 +17,9 @@ module.exports = sequelize.define('User', {
     type: Sequelize.STRING(45),
     allowNull: false
   },
+  avatar: {
+    type: Sequelize.STRING(255),
+  },
   officePosition: {
     type: Sequelize.STRING(45),
     allowNull: false

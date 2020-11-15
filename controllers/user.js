@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const validator = require("validator");
+const fs = require("fs");
+const sharp = require("sharp");
 
 const User = require("../models/User");
 const Gif = require("../models/Gif");
@@ -11,7 +13,7 @@ const Like = require("../models/Like");
 exports.getUser = (req, res, next) => {
   User.findOne({
     where: { userId: req.params.id },
-    attributes: ["userId", "firstName", "lastName", "officePosition", "email"],
+    attributes: ["userId", "firstName", "lastName", "avatar", "officePosition", "email"],
     include: [
       {
         model: Gif,
@@ -36,6 +38,7 @@ exports.getUser = (req, res, next) => {
           userId: user.userId,
           firstName: user.firstName,
           lastName: user.lastName,
+          avatar: user.avatar,
           officePosition: user.officePosition,
           email: user.email,
         },
@@ -73,6 +76,7 @@ exports.signup = (req, res, next) => {
           firstName: req.body.firstName,
           lastName: req.body.lastName,
           officePosition: req.body.officePosition,
+          avatar: req.body.avatar,
           email: req.body.email,
           password: hash,
         });
@@ -117,4 +121,41 @@ exports.login = (req, res, next) => {
         .catch((error) => res.status(500).json({ error }));
     })
     .catch((error) => res.status(400).json({ error }));
+};
+
+/* -- modify user (and the avatar if necessary) -- */
+exports.modifyUser = (req, res, next) => {
+  const officePosition = JSON.parse(req.body.officePosition);
+  if (req.file) {
+    const avatar = `${req.protocol}://${req.get("host")}/images/${
+      req.file.filename
+    }`
+    User.findAll({ where: { userId: req.params.id }, plain: true })
+      .then((user) => {
+        const filename = user.dataValues.avatar.split("/images/")[1];
+        fs.unlink(`images/${filename}`, () => {
+          User.update(
+            { officePosition: officePosition, avatar: avatar },
+            { where: { userId: req.params.id } }
+          )
+            .then(() => {
+              sharp(req.file.path)
+                .resize(480, 480)
+                .toBuffer()
+                .then((data) => {
+
+                  fs.writeFileSync(req.file.path, data);  
+                  res.status(201).json({ message: "User modified !" });
+                })
+                .catch((error) => res.status(500).json({ error }));
+            })
+            .catch((error) => res.status(400).json({ error }));
+        });
+      })
+      .catch((error) => res.status(500).json({ error }));
+  } else {
+    User.update({ officePosition: officePosition }, { where: { userId: req.params.id } })
+      .then(() => res.status(201).json({ message: "User modified !" }))
+      .catch((error) => res.status(400).json({ error }));
+  }
 };

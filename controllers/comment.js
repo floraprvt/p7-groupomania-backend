@@ -28,9 +28,9 @@ exports.createComment = (req, res, next) => {
     .catch(error => res.status(400).json({ error }))
 }
 
-/* -- modify a comment (and the image if necessary) -- */
+/* -- modify a comment -- */
 exports.modifyComment = (req, res, next) => {
-  Comment.updateOne({ ...req.body, }, { where: { commentId: req.params.id } }, )
+  Comment.update({ ...req.body, }, { where: { commentId: req.params.id } }, )
     .then(() => res.status(201).json({ message: 'Comment modified !' }))
     .catch(error => res.status(400).json({ error }))
 }
