@@ -7,8 +7,8 @@ const multer = require('../middleware/multer-config')
 
 /* -- available routes to create an account and login -- */
 router.get('/:id', userCtrl.getUser)
-router.post('/signup', userCtrl.signup)
 router.post('/login', userCtrl.login)
+router.post('/signup', multer, userCtrl.signup)
 router.put('/:id', multer, userCtrl.modifyUser)
 
 module.exports = router

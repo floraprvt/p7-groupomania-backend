@@ -13,7 +13,14 @@ const Like = require("../models/Like");
 exports.getUser = (req, res, next) => {
   User.findOne({
     where: { userId: req.params.id },
-    attributes: ["userId", "firstName", "lastName", "avatar", "officePosition", "email"],
+    attributes: [
+      "userId",
+      "firstName",
+      "lastName",
+      "avatar",
+      "officePosition",
+      "email",
+    ],
     include: [
       {
         model: Gif,
@@ -54,11 +61,11 @@ exports.getUser = (req, res, next) => {
 /* -- allow user to signup -- */
 exports.signup = (req, res, next) => {
   /* -- require valid email and strong password -- */
-  if (!validator.isEmail(req.body.email)) {
+  if (!validator.isEmail(JSON.parse(req.body.email))) {
     res.status(400).json("Your email must be valid");
   } else if (
     !validator.matches(
-      req.body.password,
+      JSON.parse(req.body.password),
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,50})/
     )
   ) {
@@ -69,30 +76,44 @@ exports.signup = (req, res, next) => {
       );
   } else {
     /* -- password "salted" 10 times -- */
-    bcrypt
-      .hash(req.body.password, 10)
-      .then((hash) => {
-        const user = new User({
-          firstName: req.body.firstName,
-          lastName: req.body.lastName,
-          officePosition: req.body.officePosition,
-          avatar: req.body.avatar,
-          email: req.body.email,
-          password: hash,
-        });
-        user
-          .save()
-          .then(() => {
-            res.status(200).json({
-              userId: user.userId,
-              token: jwt.sign({ userId: user.userId }, "RANDOM_TOKEN_SECRET", {
-                expiresIn: "24h",
-              }),
-            });
-          })
-          .catch((error) => res.status(400).json({ error }));
-      })
-      .catch((error) => res.status(500).json({ error }));
+    bcrypt.hash(JSON.parse(req.body.password), 10).then((hash) => {
+      const firstName = JSON.parse(req.body.firstName);
+      const lastName = JSON.parse(req.body.lastName);
+      const officePosition = JSON.parse(req.body.officePosition);
+      const email = JSON.parse(req.body.email);
+      const user = new User({
+        avatar: `${req.protocol}://${req.get("host")}/images/${
+          req.file.filename
+        }`,
+        firstName: firstName,
+        lastName: lastName,
+        officePosition: officePosition,
+        email: email,
+        password: hash,
+      });
+      user
+        .save()
+        .then(() => {
+          sharp(req.file.path)
+            .resize(1000)
+            .toBuffer()
+            .then((data) => {
+              fs.writeFileSync(req.file.path, data);
+              res.status(200).json({
+                userId: user.userId,
+                token: jwt.sign(
+                  { userId: user.userId },
+                  "RANDOM_TOKEN_SECRET",
+                  {
+                    expiresIn: "24h",
+                  }
+                ),
+              });
+            })
+            .catch((error) => res.status(400).json({ error }));
+        })
+        .catch((error) => res.status(500).json({ error }));
+    });
   }
 };
 
@@ -129,7 +150,7 @@ exports.modifyUser = (req, res, next) => {
   if (req.file) {
     const avatar = `${req.protocol}://${req.get("host")}/images/${
       req.file.filename
-    }`
+    }`;
     User.findAll({ where: { userId: req.params.id }, plain: true })
       .then((user) => {
         const filename = user.dataValues.avatar.split("/images/")[1];
@@ -143,8 +164,7 @@ exports.modifyUser = (req, res, next) => {
                 .resize(500)
                 .toBuffer()
                 .then((data) => {
-
-                  fs.writeFileSync(req.file.path, data);  
+                  fs.writeFileSync(req.file.path, data);
                   res.status(201).json({ message: "User modified !" });
                 })
                 .catch((error) => res.status(500).json({ error }));
@@ -154,7 +174,10 @@ exports.modifyUser = (req, res, next) => {
       })
       .catch((error) => res.status(500).json({ error }));
   } else {
-    User.update({ officePosition: officePosition }, { where: { userId: req.params.id } })
+    User.update(
+      { officePosition: officePosition },
+      { where: { userId: req.params.id } }
+    )
       .then(() => res.status(201).json({ message: "User modified !" }))
       .catch((error) => res.status(400).json({ error }));
   }

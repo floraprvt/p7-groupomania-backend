@@ -9,22 +9,22 @@ const Like = require("../models/Like");
 /* -- display gifs -- */
 exports.getAllGifs = (req, res, next) => {
   Gif.findAll({
-    attributes: ["gifId", "title", "url", "createdAt"], //[sequelize.fn('date_format', sequelize.col('gif.createdAt'), 'le %e %b à %k:%i'), 'createdAtFormed']],
+    attributes: ["userId", "gifId", "title", "url", "createdAt"],
     include: [
       {
         model: User,
         as: "User",
-        attributes: ["userId", "firstName", "lastName"],
+        attributes: ["avatar", "firstName", "lastName"],
       },
       {
         model: Comment,
         as: "Comments",
-        attributes: ["gifId"],
+        attributes: ["commentId"],
       },
       {
         model: Like,
         as: "Likes",
-        attributes: ["gifId", "likeId"],
+        attributes: ["likeId"],
       },
     ],
   })
@@ -36,29 +36,22 @@ exports.getAllGifs = (req, res, next) => {
 exports.getOneGif = (req, res, next) => {
   Gif.findOne({
     where: { gifId: req.params.id },
-    attributes: [
-      "gifId",
-      "title",
-      "url",
-      [
-        sequelize.fn(
-          "date_format",
-          sequelize.col("gif.createdAt"),
-          "le %e %b à %k:%i"
-        ),
-        "createdAtFormed",
-      ],
-    ],
+    attributes: ["userId", "gifId", "title", "url", "createdAt"],
     include: [
       {
         model: User,
         as: "User",
-        attributes: ["firstName", "lastName"],
+        attributes: ["avatar", "firstName", "lastName"],
       },
       {
         model: Comment,
         as: "Comments",
-        attributes: ["gifId"],
+        attributes: ["commentId"],
+      },
+      {
+        model: Like,
+        as: "Likes",
+        attributes: ["likeId"],
       },
     ],
   })
@@ -68,23 +61,26 @@ exports.getOneGif = (req, res, next) => {
 
 /* -- create a gif and resize uploaded image -- */
 exports.createGif = (req, res, next) => {
+  const userId = JSON.parse(req.body.userId);
+  const title = JSON.parse(req.body.title);
   const gif = new Gif({
-    userId: req.body.userId,
-    title: JSON.parse(req.body.title),
+    userId: userId,
+    title: title,
     url: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
   });
   gif
     .save()
+    .then((gif) => res.status(201).json(gif))
     .then(() => {
       sharp(req.file.path)
-        .resize(500)
+        .resize(1000)
         .toBuffer()
         .then((data) => {
           fs.writeFileSync(req.file.path, data);
-          res.status(201).json({ message: "Gif created !" });
         })
         .catch((error) => res.status(500).json({ error }));
     })
+
     .catch((error) => res.status(400).json({ error }));
 };
 
@@ -105,7 +101,7 @@ exports.modifyGif = (req, res, next) => {
           )
             .then(() => {
               sharp(req.file.path)
-                .resize(480, 480)
+                .resize(1000)
                 .toBuffer()
                 .then((data) => {
                   fs.writeFileSync(req.file.path, data);
