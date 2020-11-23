@@ -1,13 +1,12 @@
-const express = require('express')
-const router = express.Router()
+const express = require("express");
+const router = express.Router();
 
-const auth = require('../middleware/auth')
+const auth = require("../middleware/auth");
 
-const commentsCtrl = require('../controllers/like')
+const likesCtrl = require("../controllers/like");
 
 /* -- availables routes for comments, with authentication -- */
-router.get('/:id', auth, commentsCtrl.getLikes)
-router.post('/:id', auth, commentsCtrl.createLike)
-router.delete('/:id', auth, commentsCtrl.deleteLike)
+router.post("/:id", auth, likesCtrl.createLike);
+router.delete("/:id", auth, likesCtrl.deleteLike);
 
-module.exports = router
+module.exports = router;
