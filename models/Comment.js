@@ -13,9 +13,4 @@ module.exports = sequelize.define("Comment", {
     type: Sequelize.TEXT,
     allowNull: false,
   },
-  likes: {
-    type: Sequelize.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
-  },
 });

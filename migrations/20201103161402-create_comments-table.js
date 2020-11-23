@@ -14,11 +14,6 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: false,
       },
-      likes: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
-      },
       gifId: {
         type: Sequelize.INTEGER,
         allowNull: false,
