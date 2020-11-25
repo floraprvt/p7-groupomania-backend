@@ -18,10 +18,7 @@ Connectez vous à MySQL (dans MySQL command line : `mysql -u root -p` )
 
 Ajouter la base de données à partir du fichier .sql contenu dans le dossier database : `SOURCE /votrechemin/database/dump-groupomania.sql` 
 
-
-2. Node
-
-Créez un fichier config.json (pensez à intégrer votre propre mot de passe) contenant :
+Créez un fichier config.json à la racine du dossier cloné (pensez à intégrer votre propre mot de passe) contenant :
 ```json
 {
   "development": {
@@ -34,6 +31,11 @@ Créez un fichier config.json (pensez à intégrer votre propre mot de passe) co
 }
 ```
 
+
+2. Node.js
+
 Entrez `npm install` puis `npm start`
+
+
 
 Maintenant rendez-vous sur le dépôt : https://github.com/Flora-Pvt/p7-groupomania-frontend
