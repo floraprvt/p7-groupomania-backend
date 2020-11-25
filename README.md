@@ -13,12 +13,14 @@ Node.js, Express, MySQL, Sequelize et sont mis en place des outils pour respecte
 Après avoir cloné le dossier :
 
 1. MySQL
+
 Connectez vous à MySQL (dans MySQL command line : `mysql -u root -p` )
 
 Ajouter la base de données à partir du fichier .sql contenu dans le dossier database : `SOURCE /votrechemin/database/dump-groupomania.sql` 
 
 
 2. Node
+
 Créez un fichier config.json (pensez à intégrer votre propre mot de passe) contenant :
 ```json
 {
