@@ -10,14 +10,28 @@ Node.js, Express, MySQL, Sequelize et sont mis en place des outils pour respecte
 
 ## Pour démarrer le projet
 
-Après avoir cloné le dossier, dans votre terminal, à l'intérieur de ce dossier, entrez successivement les commandes suivantes :
+Après avoir cloné le dossier :
 
-`npm install`
+1. MySQL
+Connectez vous à MySQL (dans MySQL command line : `mysql -u root -p` )
 
-Avec mySQL et une base de données correspondante :
-`mysql -u root -p` connectez vous à mySQL avec votre mot de passe
-`CREATE DATABASE mydb`
-`mysql -e "source /votrechemin/votrefichierdump.sql" mydb`
+Ajouter la base de données à partir du fichier .sql contenu dans le dossier database : `SOURCE /votrechemin/database/dump-groupomania.sql` 
 
-`npm start` ou `nodemon server`
-Puis rendez-vous sur le dépôt : https://github.com/Flora-Pvt/p7-groupomania-frontend
+
+2. Node
+Créez un fichier config.json (pensez à intégrer votre propre mot de passe) contenant :
+```json
+{
+  "development": {
+    "username": "root",
+    "password": "votre-mot-de-passe",
+    "database": "mydb",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
+```
+
+Entrez `npm install` puis `npm start`
+
+Maintenant rendez-vous sur le dépôt : https://github.com/Flora-Pvt/p7-groupomania-frontend

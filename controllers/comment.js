@@ -18,6 +18,23 @@ exports.getAllComments = (req, res, next) => {
     .catch((error) => res.status(404).send({ error }));
 };
 
+/* -- get one comment -- */
+exports.getOneComment = (req, res, next) => {
+  Comment.findOne({
+    where: { commentId: req.params.id },
+    include: [
+      {
+        model: User,
+        as: "User",
+        attributes: ["avatar", "firstName", "lastName"],
+      },
+    ],
+    attributes: ["commentId", "content", "createdAt"],
+  })
+    .then((comment) => res.status(200).json(comment))
+    .catch((error) => res.status(404).send({ error }));
+};
+
 /* -- create a comment and resize uploaded image -- */
 exports.createComment = (req, res, next) => {
   const comment = new Comment({

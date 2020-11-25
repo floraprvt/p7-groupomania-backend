@@ -6,9 +6,13 @@ const MIME_TYPES = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
+  "image/gif": "gif",
+  "image/bmp": "bmp",
   "video/x-msvideo": "avi",
   "video/mpeg": "mpeg",
   "video/webm": "webm",
+  "video/mp4": "mp4",
+  "video/quicktime": "mov",
 };
 
 /* -- saving uploaded images -- */
